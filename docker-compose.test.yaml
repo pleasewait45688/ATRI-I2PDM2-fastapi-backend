@@ -1,0 +1,30 @@
+services:
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: "all" # Number of GPUs to use (or "all")
+              capabilities: [ gpu ]
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all # Use all GPUs or specify specific ones (e.g., 0,1)
+      - NVIDIA_DRIVER_CAPABILITIES=all
+
+    env_file: ".env"
+    image: tedlinlab/i2pdm2-backend:latest
+    container_name: backend-test
+    volumes:
+      # - ./app:/i2pdm2/app
+      - ./scripts:/i2pdm2/scripts
+      # - ./tmp:/i2pdm2/tmp
+      - test-image-data:/i2pdm2/tmp
+    command: bash ./scripts/test.sh
+
+# for production deploy, use an isolated storage for data
+volumes:
+  test-image-data:

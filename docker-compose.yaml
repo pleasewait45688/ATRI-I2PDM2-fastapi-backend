@@ -1,0 +1,46 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: "all" # Number of GPUs to use (or "all")
+              capabilities: [ gpu ]
+    runtime: nvidia
+    restart: always #check_gpu 偵測錯誤後重啟
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all # Use all GPUs or specify specific ones (e.g., 0,1)
+      - NVIDIA_DRIVER_CAPABILITIES=all
+
+    env_file: ".env"
+    image: tedlinlab/i2pdm2-backend:latest
+    container_name: backend
+    volumes:
+      - app-image-data:/i2pdm2/tmp
+      - ./check_gpu.sh:/i2pdm2/check_gpu.sh #加入check_gpu.sh
+    # ROOT_PATH comes from .env — empty for local testing, set to your reverse-proxy
+    # path prefix when deploying under a real domain.
+    command: [ "sh", "-c", "PYTHONPATH=/i2pdm2 python3 app/init_db.py && /i2pdm2/check_gpu.sh & fastapi run --workers 4 --root-path \"${ROOT_PATH}\" app/main.py" ] #加入init_db.py
+    ports:
+      # - 8000:8000
+      - 28000:8000
+    logging:
+      options:
+        max-size: 10m
+        max-file: "10"
+
+    networks:
+      - pest_app_network
+
+# for production deploy, use an isolated storage for data
+volumes:
+  app-image-data:
+
+
+networks:
+  pest_app_network:
+    external: true

@@ -1,0 +1,11 @@
+.venv*
+.coverage*
+**/*.log
+**/.*_cache
+**/*.pyc
+app.egg-info
+htmlcov
+tmp/
+__pycache__/
+*.env
+kuo*

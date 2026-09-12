@@ -1,0 +1,11 @@
+# Python
+__pycache__
+app.egg-info
+*.pyc
+.mypy_cache
+.ruff_cache
+*cache*
+.coverage
+htmlcov
+.venv
+.env

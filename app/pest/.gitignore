@@ -1,0 +1,7 @@
+.venv*
+__pycache__*
+model/*.pt
+model/*.pth
+model/*.pickle
+model/*.json
+model/*.zip
