@@ -5,7 +5,6 @@ class PestResult(Base):
     __tablename__ = "pest_records"
 
     id = Column(Integer, primary_key=True, index=True)
-    line_user_id = Column(String(255), index=True, nullable=False)  # LINE ID
     uuid = Column(String(255), unique=True, nullable=False)         # 圖片 UUID
     image_path = Column(String(255), nullable=False)               # 儲存圖片路徑
     result = Column(String(255), nullable=False)                       # 辨識結果數量

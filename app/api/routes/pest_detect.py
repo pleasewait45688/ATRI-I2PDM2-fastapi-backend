@@ -6,7 +6,7 @@ from PIL import Image
 from io import BytesIO
 import base64
 import gc
-from fastapi import APIRouter, UploadFile, HTTPException, BackgroundTasks, Response, Query
+from fastapi import APIRouter, UploadFile, HTTPException, BackgroundTasks, Response
 from fastapi.responses import FileResponse
 from app.pest.i2pdm2 import YOLOv11Detector, QualityInspection, PieChart
 import torch
@@ -282,8 +282,7 @@ async def preprocess(image_id: str):
 
 
 @router.get("/detect/{image_id}")
-async def inference(image_id: str, userid: str = Query(None), db: Session = Depends(get_db)):
-    logger.info(f"📦 接收到的 userID: {userid}")
+async def inference(image_id: str, db: Session = Depends(get_db)):
     if reload_lock.locked():
         logger.warning("Server is currently reloading the model.")
         raise HTTPException(
@@ -376,21 +375,17 @@ async def inference(image_id: str, userid: str = Query(None), db: Session = Depe
     logger.info(f"Inference and pie chart generation completed successfully for image ID: {image_id}")
 
     # 寫入資料庫
-    if userid:
-        try:
-            record = PestResult(
-                line_user_id=userid,
-                uuid=image_id,
-                image_path=str(output_image_path),
-                result=str(result_json)
-            )
-            db.add(record)
-            db.commit()
-            logger.info(f"✅ 寫入資料庫成功: 使用者 {userid}")
-        except Exception as e:
-            logger.error(f"❌ 寫入資料庫失敗: {e}")
-    else:
-        logger.warning("⚠️ 無 user_id，略過寫入資料庫")
+    try:
+        record = PestResult(
+            uuid=image_id,
+            image_path=str(output_image_path),
+            result=str(result_json)
+        )
+        db.add(record)
+        db.commit()
+        logger.info("✅ 寫入資料庫成功")
+    except Exception as e:
+        logger.error(f"❌ 寫入資料庫失敗: {e}")
 
     # Include the Base64 image in the response
     response = {

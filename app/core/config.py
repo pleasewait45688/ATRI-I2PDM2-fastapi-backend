@@ -22,13 +22,8 @@ class Settings(BaseSettings):
             return []
         return [origin.strip() for origin in self.ALLOWED_ORIGINS.split(",") if origin.strip()]
     
-    LINE_CHANNEL_SECRET: str | None
-    LINE_CHANNEL_ACCESS_TOKEN: str | None
     #add env for db
     DATABASE_URL: str | None
-
-    # base URL for links sent to LINE users (recognition/info/history pages)
-    FRONTEND_BASE_URL: str | None
 
     API_V1_STR: str = "/api/v1"
     ENVIRONMENT: Literal["local", "staging", "production"] = "local"
