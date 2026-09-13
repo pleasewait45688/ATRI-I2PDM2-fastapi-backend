@@ -1,7 +1,29 @@
 # I2PDM2-FastAPI-Backend
 
-A simple API server for i2pdm2 backend.
+A simple API server for i2pdm2 pest recognition — recognition only. There is
+no LINE bot, user-profile, or history/trend feature here; every detection
+request is logged as one row in the `pest_records` table (see
+`I2PDM2-mysql`), with no user identity attached.
 
+## Quick Start (Docker)
+
+**Prerequisites:**
+* Docker + Docker Compose v2
+* An NVIDIA GPU with a driver new enough for CUDA 12.1+ — `nvidia-smi`
+  should report "CUDA Version: 12.1" or higher
+* `nvidia-container-toolkit` installed, so `docker info` lists an `nvidia`
+  runtime
+
+**Setup:**
+1. Copy `.env.example` to `.env`. `DATABASE_URL` must match the account you
+   set up in `I2PDM2-mysql/.env`.
+2. Place the model weight files in `app/pest/model/` — these are not in git
+   (delivered separately, e.g. secure file transfer). See
+   [app/pest/model/README.md](app/pest/model/README.md) for the exact list.
+3. Create the network shared with `I2PDM2-mysql` (once, if it doesn't
+   already exist): `docker network create pest_app_network`
+4. Start `I2PDM2-mysql` first — this service connects to it on startup.
+5. `docker compose up -d --build`
 
 ### API Document
 Local: http://localhost:28000/docs
@@ -11,9 +33,6 @@ To deploy under a real domain/reverse-proxy path, set `ROOT_PATH` in `.env` (see
 > At the time of writing, parts of the API server are experimental, and hence subject to change.
 
 ## Deployment
-* Docker
-* nvidia-contianer-toolkit
-* Requires the external network used by `docker-compose.yaml`/`I2PDM2-mysql`'s compose file to exist first: `docker network create pest_app_network`
 
 ```bash
 # Build
@@ -30,22 +49,10 @@ docker cp backend:/i2pdm2/tmp/log/app.log .
 
 ## Development
 
-* pytorch: (tested: 12.1, 12.4)
-```bash
-pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
-```
-* check out [requirements](requirements.txt) for other dependencies
-* Docker
-* nvidia-contianer-toolkit
+* Dependencies (including the pinned `torch`/`torchvision`/`torchaudio` build) are in
+  [requirements.txt](requirements.txt)
+* Docker, nvidia-container-toolkit (see Quick Start above)
 
-### Tests
-
-```bash
-# test locally
-bash ./scripts/test.sh
-# Perform tests using deploy environment 
-docker compose -f docker-compose.test.yaml up --build
-```
 ### Format
 
 ```bash
